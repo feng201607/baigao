@@ -1,0 +1,66 @@
+vector<vector<unordered_set<int>>> possibleNumberInference (vector<vector<int>>& cells) //确定某个单元格只能填那个数字
+{
+	vector<vector<unordered_set<int>>> ans(9,vector<unordered_set<int>>(9,unordered_set<int>{1,2,3,4,5,6,7,8,9}));
+	for(int i=0;i<9;i++)
+	{
+		for(int j=0;j<9;j++)
+		{
+			if(cells[i][j]!=0)
+			{
+				ans[i][j].clear();//如果该格已经填入数字，则该格的候选数字集合清空
+			}
+		}
+	}//初始化
+	int change_flag=1;//标记答案数组是否被更改
+	while(change_flag)
+	{
+		change_flag=0;
+		for(int i=0;i<9;i++)
+		{
+			for(int j=0;j<9;j++)
+			{
+				int row=i;//所处行
+				int col=j;//所处列
+				for(int k=0;k<9;k++)//从[i][j]中删除行有的数字
+				{
+					if(k!=j&&cells[i][k]!=0)
+					{
+						if(ans[i][j].erase(cells[i][k]))
+							change_flag = 1;
+					}
+				}
+				for(int k=0;k<9;k++)//从[i][j]中删除列有的数字
+				{
+					if(k!=i&&cells[k][j]!=0)
+					{
+						if(ans[i][j].erase(cells[k][j]))
+							change_flag = 1;
+					}
+				}
+				for(int k=0;k<9;k++)//从[i][j]中删除九宫格有的数字
+				{
+					int row1=row/3*3+k/3;
+					int col1=col/3*3+k%3;
+					if((row1!=row || col1!=col) && cells[row1][col1]!=0)
+					{
+						if(ans[i][j].erase(cells[row1][col1]))
+							change_flag = 1;
+					}
+				}
+			}
+		}
+		for(int i=0;i<9;i++)
+		{
+			for(int j=0;j<9;j++)
+			{
+				if(cells[i][j]==0 && ans[i][j].size()==1)
+				{
+					cells[i][j]=*ans[i][j].begin();//确认该数字位置
+					ans[i][j].clear();//该格的候选数字集合清空
+					change_flag=1;
+				}
+			}
+		}
+	}
+	return ans;
+}

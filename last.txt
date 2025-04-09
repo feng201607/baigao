@@ -1,0 +1,107 @@
+vector<vector<unordered_set<int>>> lastRemainingCellInference (vector<vector<int>>& cells) //确定某个区域（行、列、九宫格）只有某格可以填入某数字
+{
+	vector<vector<unordered_set<int>>> ans(9,vector<unordered_set<int>>(9,unordered_set<int>{1,2,3,4,5,6,7,8,9}));
+	for(int i=0;i<9;i++)
+	{
+		for(int j=0;j<9;j++)
+		{
+			if(cells[i][j]!=0)
+			{
+				ans[i][j].clear();//如果该格已经填入数字，则该格的候选数字集合清空
+			}
+		}
+	}//初始化
+	int change_flag=1;//标记答案数组是否被更改
+	while(change_flag)
+	{
+		change_flag=0;
+		for(int i=0;i<9;i++)
+		{
+			for(int j=0;j<9;j++)
+			{
+				int row=i;//所处行
+				int col=j;//所处列
+				for(int k=0;k<9;k++)//从[i][j]中删除行有的数字
+				{
+					if(k!=j&&cells[i][k]!=0)
+					{
+						if(ans[i][j].erase(cells[i][k]))
+							change_flag = 1;
+					}
+				}
+				for(int k=0;k<9;k++)//从[i][j]中删除列有的数字
+				{
+					if(k!=i&&cells[k][j]!=0)
+					{
+						if(ans[i][j].erase(cells[k][j]))
+							change_flag = 1;
+					}
+				}
+				for(int k=0;k<9;k++)//从[i][j]中删除九宫格有的数字
+				{
+					int row1=row/3*3+k/3;
+					int col1=col/3*3+k%3;
+					if((row1!=row || col1!=col) && cells[row1][col1]!=0)
+					{
+						if(ans[i][j].erase(cells[row1][col1]))
+							change_flag = 1;
+					}
+				}
+				//若该行只有该单元格能填该数字，则确认该数字位置
+				for(int k=1;k<=9;k++)//逐个检测数字是否已被填入
+				{
+					int count=0;//该数字在该行出现的次数
+					for(int m=0;m<9;m++)
+					{
+						if(m!=j&&ans[i][m].find(k)!=ans[i][m].end())
+						{
+							count++;
+						}
+					}
+					if(count==0&&ans[i][j].find(k)!=ans[i][j].end())//该数字在该行只出现一次
+					{
+						cells[i][j]=k;//确认该数字位置
+						ans[i][j].clear();//该格的候选数字集合清空
+						change_flag=1;
+						break;
+					}
+					//若该列只有该单元格能填该数字，则确认该数字位置
+					count = 0; // 重置计数器
+					for(int m=0;m<9;m++)
+					{
+						if(m!=i&&ans[m][j].find(k)!=ans[m][j].end())
+						{
+							count++;
+						}
+					}
+					if(count==0&&ans[i][j].find(k)!=ans[i][j].end())//该数字在该列只出现一次
+					{
+						cells[i][j]=k;//确认该数字位置
+						ans[i][j].clear();//该格的候选数字集合清空
+						change_flag=1;
+						break;
+					}
+					//若该九宫格只有该单元格能填该数字，则确认该数字位置
+					count = 0; // 重置计数器
+					for(int m=0;m<9;m++)
+					{
+						int row1=row/3*3+m/3;
+						int col1=col/3*3+m%3;
+						if((row1!=row || col1!=col) && ans[row1][col1].find(k)!=ans[row1][col1].end())
+						{
+							count++;
+						}
+					}
+					if(count==0&&ans[i][j].find(k)!=ans[i][j].end())//该数字在该九宫格只出现一次
+					{
+						cells[i][j]=k;//确认该数字位置
+						ans[i][j].clear();//该格的候选数字集合清空
+						change_flag=1;
+						break;
+					}
+				}
+			}
+		}
+	}
+	return ans;
+}
